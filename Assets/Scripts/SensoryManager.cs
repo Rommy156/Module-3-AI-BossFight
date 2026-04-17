@@ -9,10 +9,11 @@ public class SensoryManager : MonoBehaviour
 
     private List <SoundObject> registeredSoundObjects = new List<SoundObject>();
     private void Awake()
-    {;
-           
+    {
             RegisterAllSounds();
     }
+    // register all sound objects in the scene to the npc's hearing system
+    
     public void RegisterAllSounds()
     {
         foreach (Transform child in soundObjects.transform)
@@ -20,7 +21,7 @@ public class SensoryManager : MonoBehaviour
             SoundObject soundObject = child.GetComponent<SoundObject>();
             if (soundObject != null)
             {
-                Debug.Log($"Registering sound object: {soundObject.name}");
+
                 soundObject.OnSoundTrigger.AddListener(npc.SoundTrigger);
                 registeredSoundObjects.Add(soundObject);
             }

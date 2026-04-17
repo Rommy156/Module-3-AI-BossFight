@@ -6,6 +6,7 @@ using UnityEngine.AI;
 
 public class SimpleStateMachine : EnemyAttack
 {
+    //define states
     enum State { Circle, Approach, Attack1, Attack2, Charge }
 
     [Header("Scene References")]
@@ -67,7 +68,7 @@ public class SimpleStateMachine : EnemyAttack
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
     }
-
+    //set default state
     void Start()
     {
         state = State.Circle;
@@ -87,7 +88,7 @@ public class SimpleStateMachine : EnemyAttack
             case State.Charge: Approach2(); break;
         }
 
-        // Always face player except during charge (so dash stays straight)
+        // Always face player except during charge 
         if (!isCharging)
         {
             Vector3 dir = (character.position - transform.position).normalized;
@@ -103,7 +104,7 @@ public class SimpleStateMachine : EnemyAttack
         if (stateText != null)
             stateText.text = "State: " + state;
     }
-
+    //animation event to apply damage
     public void OnAttackHit()
     {
         if (!IsPlayerInHitRange()) return;
@@ -111,6 +112,7 @@ public class SimpleStateMachine : EnemyAttack
         anim.SetBool("IsHit", true);
         successfulHits++;
 
+        // checks if player is within hit radius
         bool IsPlayerInHitRange()
         {
             Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward, 1f);
@@ -123,12 +125,15 @@ public class SimpleStateMachine : EnemyAttack
             return false;
         }
     }
+    //sound trigger for mutant to investigate
     public void SoundTrigger(Vector3 pos)
     {
         soundHeard = true;
         soundPosition = pos;
         state = State.Approach;
     }
+
+    //called when enemy takes damage
     public void OnTakeDamage(int dmg)
     {
         hitsTaken++;
@@ -142,17 +147,17 @@ public class SimpleStateMachine : EnemyAttack
         anim.SetBool("CanAttack2", false);
         anim.SetBool("IsReatreating", false);
     }
-
+    //enable hitbox during attack animation, called by animation event
     public void EnableHitbox()
     {
         hitbox.SetActive(true);
     }
-
+    //disable hitbox after attack animation, called by animation event
     public void DisableHitbox()
     {
         hitbox.SetActive(false);
     }
-
+    //default state where enemy circles around player, transitions to approach if player is seen or after certain time
     void Circle()
     {
         if (Time.time - circleTime >= circleTimeThreshold)
@@ -162,6 +167,7 @@ public class SimpleStateMachine : EnemyAttack
         agent.SetDestination(character.position);
     }
 
+    //initialize Circle state, checks if player is in range to attack or approach
     void StartCircle()
     {
         state = State.Circle;
@@ -182,7 +188,8 @@ public class SimpleStateMachine : EnemyAttack
             anim.SetBool("IsApproaching", true);
         }
     }
-
+    //move towards player, transitions to attack if in range or approach2
+    //if too many hits taken
     void Approach()
     {
         agent.SetDestination(character.position);
@@ -213,7 +220,8 @@ public class SimpleStateMachine : EnemyAttack
             StartApproach2();
         }
     }
-
+    //first attack in combo, if successful hit transitions to attack2,
+    //otherwise back to circling
     void Attack1()
     {
         agent.SetDestination(transform.position);
@@ -249,7 +257,7 @@ public class SimpleStateMachine : EnemyAttack
         ResetAnimatorBools();
         anim.SetBool("CanAttack1", true);
     }
-
+    // second combo attack logic
     void Attack2()
     {
         agent.SetDestination(transform.position);
@@ -283,6 +291,7 @@ public class SimpleStateMachine : EnemyAttack
         anim.SetBool("CanAttack2", true);
     }
 
+    //charge/dash movement behavior
     void Approach2()
     {
         float elapsed = Time.time - retreatTime;
@@ -312,6 +321,7 @@ public class SimpleStateMachine : EnemyAttack
         isCharging = true;
     }
 
+    // checks if player is within vision cone
     bool IsInViewCone()
     {
         Vector3 toPlayer = character.position - transform.position;
