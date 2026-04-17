@@ -159,7 +159,6 @@ public class SimpleStateMachine : EnemyAttack
         {
             StartCircle();
         }
-
         agent.SetDestination(character.position);
     }
 
